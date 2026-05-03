@@ -17,6 +17,31 @@ export class SystemController {
     response.status(200).json({ data: system });
   };
 
+  public getCurrentProfile = async (_request: Request, response: Response): Promise<void> => {
+    const profile = await this.systemService.getCurrentProfile();
+    response.status(200).json({ data: profile });
+  };
+
+  public getCurrentQuests = async (_request: Request, response: Response): Promise<void> => {
+    const quests = await this.systemService.getCurrentQuests();
+    response.status(200).json({ data: quests });
+  };
+
+  public getCurrentBosses = async (_request: Request, response: Response): Promise<void> => {
+    const bosses = await this.systemService.getCurrentBosses();
+    response.status(200).json({ data: bosses });
+  };
+
+  public getCurrentShop = async (_request: Request, response: Response): Promise<void> => {
+    const shop = await this.systemService.getCurrentShop();
+    response.status(200).json({ data: shop });
+  };
+
+  public getCurrentSkills = async (_request: Request, response: Response): Promise<void> => {
+    const skills = await this.systemService.getCurrentSkills();
+    response.status(200).json({ data: skills });
+  };
+
   public updateTheme = async (request: Request, response: Response): Promise<void> => {
     const system = await this.systemService.updateTheme({
       theme: request.body.theme,

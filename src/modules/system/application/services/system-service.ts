@@ -17,6 +17,47 @@ export class SystemService {
     return this.systemRepository.findCurrent();
   }
 
+  public async getCurrentProfile() {
+    const system = await this.systemRepository.findCurrent();
+    return {
+      profileName: system.profileName,
+      title: system.title,
+      className: system.className,
+      level: system.level,
+      rank: system.rank,
+      theme: system.theme,
+      profile: system.profile,
+      vitals: system.vitals,
+      attributes: system.attributes,
+      xp: system.xp,
+      xpToNextLevel: system.xpToNextLevel,
+    };
+  }
+
+  public async getCurrentQuests() {
+    const system = await this.systemRepository.findCurrent();
+    return system.quests;
+  }
+
+  public async getCurrentBosses() {
+    const system = await this.systemRepository.findCurrent();
+    return system.bosses;
+  }
+
+  public async getCurrentShop() {
+    const system = await this.systemRepository.findCurrent();
+    return {
+      coins: system.coins,
+      shopItems: system.shopItems,
+      inventory: system.inventory,
+    };
+  }
+
+  public async getCurrentSkills() {
+    const system = await this.systemRepository.findCurrent();
+    return system.skills;
+  }
+
   public async updateTheme(input: UpdateThemeDto): Promise<AscensionSystem> {
     if (input.theme !== "crimson" && input.theme !== "violet") {
       throw new AppError("Theme must be either crimson or violet.", 400, "INVALID_THEME");

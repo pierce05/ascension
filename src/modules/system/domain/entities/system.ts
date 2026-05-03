@@ -71,6 +71,25 @@ export type LeaderboardEntry = {
   isCurrentUser: boolean;
 };
 
+export type ProfileBadge = {
+  id: string;
+  label: string;
+  tone: "crimson" | "gold" | "violet";
+};
+
+export type PlayerProfile = {
+  bannerTitle: string;
+  username: string;
+  quote: string;
+  bio: string;
+  guild: string;
+  combatPower: number;
+  evolutionStage: string;
+  avatarInitials: string;
+  presenceLabel: string;
+  badges: ProfileBadge[];
+ };
+
 export type AscensionSystem = {
   id: string;
   profileName: string;
@@ -88,6 +107,7 @@ export type AscensionSystem = {
   todayScore: number;
   todayDone: number;
   theme: ThemeOption;
+  profile: PlayerProfile;
   vitals: Vitals;
   attributes: Attributes;
   quests: Quest[];

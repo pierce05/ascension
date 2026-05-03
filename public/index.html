@@ -420,6 +420,93 @@ select.inp option { background: #1a0000; }
 .cal-day.today { background: var(--red-bright); color: #fff; font-weight: 700; }
 .cal-day.hdr { background: transparent; color: var(--text-dim); font-size: 10px; letter-spacing: 1px; }
 
+
+
+/* PROFILE PAGE */
+.profile-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr) 320px; gap: 10px; }
+.profile-stack { display: flex; flex-direction: column; gap: 10px; }
+.profile-banner {
+  min-height: 168px; border: 1px solid var(--border-bright); border-radius: 4px; padding: 14px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 32, 32, 0.22), transparent 30%),
+    linear-gradient(180deg, rgba(255, 20, 20, 0.08), rgba(10, 0, 0, 0.4)),
+    linear-gradient(135deg, #140000 0%, #090000 100%);
+  position: relative; overflow: hidden;
+}
+.profile-banner::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,0.12) 0 1px, transparent 1px),
+    radial-gradient(circle at 80% 14%, rgba(255,255,255,0.08) 0 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(255, 68, 68, 0.16), transparent 52%);
+  background-size: 160px 160px, 180px 180px, auto;
+  pointer-events: none;
+}
+.profile-banner h2 { font-family: 'Orbitron', monospace; font-size: 22px; color: #fff; position: relative; z-index: 1; }
+.profile-banner p { position: relative; z-index: 1; }
+.profile-nameplate { display: flex; align-items: center; gap: 12px; }
+.profile-avatar-lg {
+  width: 92px; height: 92px; border-radius: 50%; border: 2px solid var(--red-bright);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25), transparent 26%),
+    linear-gradient(180deg, rgba(255, 34, 34, 0.35), rgba(61, 0, 0, 0.95));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Orbitron', monospace; font-size: 28px; color: #fff;
+  box-shadow: 0 0 24px rgba(204,0,0,0.45);
+}
+.profile-handle { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
+.profile-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.profile-badge {
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 10px;
+  letter-spacing: 1px; text-transform: uppercase; background: rgba(139,0,0,0.18);
+}
+.profile-badge.gold { color: var(--gold); border-color: rgba(212,175,55,0.45); background: rgba(212,175,55,0.08); }
+.profile-badge.violet { color: #dba8ff; border-color: rgba(200,120,255,0.4); background: rgba(110,40,160,0.18); }
+.profile-badge.crimson { color: var(--red-ultra); }
+.profile-center {
+  min-height: 760px; display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+  padding: 24px 16px; background:
+    radial-gradient(circle at 50% 28%, rgba(255, 56, 56, 0.30), rgba(255, 56, 56, 0.02) 34%, transparent 36%),
+    linear-gradient(180deg, rgba(255, 28, 28, 0.06), rgba(0,0,0,0.12)),
+    linear-gradient(180deg, #120000 0%, #090000 100%);
+  overflow: hidden;
+}
+.profile-center::before {
+  content: ''; width: 320px; height: 320px; border-radius: 50%; border: 2px solid rgba(255, 78, 78, 0.55);
+  box-shadow: 0 0 45px rgba(255, 32, 32, 0.38), inset 0 0 28px rgba(255, 90, 90, 0.1);
+  position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+}
+.profile-center::after {
+  content: ''; width: 430px; height: 430px; border-radius: 50%; border: 1px solid rgba(255, 68, 68, 0.18);
+  position: absolute; top: 35px; left: 50%; transform: translateX(-50%);
+}
+.profile-center.card::before { width: 3px; height: 100%; inset: 0 auto 0 0; border-radius: 4px 0 0 4px; }
+.profile-chamber { position: relative; width: 100%; min-height: 520px; display: flex; align-items: center; justify-content: center; }
+.profile-silhouette { position: relative; z-index: 2; width: 240px; height: 430px; }
+.profile-silhouette .head {
+  width: 74px; height: 74px; border-radius: 50%; background: linear-gradient(180deg, #1a0e16, #040204);
+  margin: 0 auto; box-shadow: 0 0 22px rgba(0,0,0,0.55);
+}
+.profile-silhouette .body {
+  width: 112px; height: 176px; margin: -6px auto 0; background: linear-gradient(180deg, #12090f, #040204);
+  clip-path: polygon(32% 0%, 68% 0%, 78% 25%, 80% 48%, 70% 100%, 30% 100%, 20% 48%, 22% 25%);
+}
+.profile-silhouette .cape {
+  width: 240px; height: 270px; margin: -72px auto 0; background: linear-gradient(180deg, rgba(25,10,15,0.98), rgba(5,2,4,0.98));
+  clip-path: polygon(50% 0%, 74% 10%, 90% 28%, 100% 75%, 78% 100%, 54% 92%, 50% 86%, 46% 92%, 22% 100%, 0% 75%, 10% 28%, 26% 10%);
+  box-shadow: 0 0 30px rgba(0,0,0,0.42);
+}
+.profile-floor { width: 100%; height: 90px; border-top: 1px solid rgba(255, 90, 90, 0.15); background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); }
+.profile-meta-grid { width: 100%; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.profile-meta-box { border: 1px solid var(--border); background: rgba(26, 0, 0, 0.72); border-radius: 4px; padding: 10px; min-height: 74px; }
+.profile-meta-box .label { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+.profile-meta-box .value { font-family: 'Orbitron', monospace; color: #fff; margin-top: 6px; font-size: 16px; }
+.profile-list { display: flex; flex-direction: column; gap: 8px; }
+.profile-line { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.profile-line span:first-child { color: var(--text-dim); }
+.profile-about { line-height: 1.7; color: var(--text-dim); font-size: 13px; }
+@media (max-width: 1100px) { .profile-grid { grid-template-columns: 1fr; } .profile-center { min-height: 640px; } }
+
 /* SCROLLBAR */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
@@ -453,6 +540,7 @@ select.inp option { background: #1a0000; }
 
   <div class="tabs">
     <button class="tab active" onclick="showTab('dashboard')">⚔ Dashboard</button>
+    <button class="tab" onclick="showTab('profile')">PROFILE</button>
     <button class="tab" onclick="showTab('quests')">📋 Quests</button>
     <button class="tab" onclick="showTab('skills')">🌌 Skills</button>
     <button class="tab" onclick="showTab('boss')">👹 Boss Fight</button>
@@ -520,6 +608,75 @@ select.inp option { background: #1a0000; }
     <div class="card">
       <div class="card-title">WEEKLY HABIT TRACKER</div>
       <div class="cal-grid" id="week-cal"></div>
+    </div>
+  </div>
+
+
+
+  <!-- PROFILE -->
+  <div class="content" id="tab-profile">
+    <div class="profile-grid">
+      <div class="profile-stack">
+        <div class="card profile-banner">
+          <div class="profile-nameplate">
+            <div class="profile-avatar-lg" id="profile-avatar-initials">LF</div>
+            <div>
+              <div class="card-title" style="margin-bottom:6px">PROFILE</div>
+              <h2 id="profile-display-name">LEFNIRE</h2>
+              <div class="profile-handle" id="profile-handle">shadow.lefnire</div>
+            </div>
+          </div>
+          <div class="profile-badges" id="profile-badges"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">SYSTEM ORIGIN</div>
+          <div style="font-family:'Orbitron',monospace;font-size:20px;color:#fff;margin-bottom:6px" id="profile-banner-title">Solo Leveling System</div>
+          <div class="profile-about" id="profile-quote">You have to get stronger if you want to survive.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">IDENTITY</div>
+          <div class="profile-list">
+            <div class="profile-line"><span>Class</span><strong id="profile-class">Shadow Monarch</strong></div>
+            <div class="profile-line"><span>Title</span><strong id="profile-title">The Relentless</strong></div>
+            <div class="profile-line"><span>Guild</span><strong id="profile-guild">Memora Labs</strong></div>
+            <div class="profile-line"><span>Presence</span><strong id="profile-presence">Awakened Vessel</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="card profile-center">
+        <div class="profile-chamber">
+          <div class="profile-silhouette">
+            <div class="head"></div>
+            <div class="body"></div>
+            <div class="cape"></div>
+          </div>
+        </div>
+        <div class="profile-meta-grid">
+          <div class="profile-meta-box"><div class="label">Evolution Stage</div><div class="value" id="profile-stage">Shadow Monarch Candidate</div></div>
+          <div class="profile-meta-box"><div class="label">Combat Power</div><div class="value" id="profile-combat">15,670</div></div>
+          <div class="profile-meta-box"><div class="label">Rank / Level</div><div class="value" id="profile-rank-level">SSS / 27</div></div>
+        </div>
+        <div class="profile-floor"></div>
+      </div>
+      <div class="profile-stack">
+        <div class="card">
+          <div class="card-title">ABOUT</div>
+          <div class="profile-about" id="profile-bio">Builder, grinder, and system-breaker.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">POWER FLOW</div>
+          <div class="stat-row"><div class="stat-row-top"><span>XP Channel</span><span id="profile-xp-value">0 / 0</span></div><div class="bar-sm"><div class="bar-sm-fill" id="profile-xp-bar" style="width:0%"></div></div></div>
+          <div class="stat-row"><div class="stat-row-top"><span>Health Core</span><span id="profile-health-value">0</span></div><div class="bar-sm"><div class="bar-sm-fill" id="profile-health-bar" style="width:0%"></div></div></div>
+          <div class="stat-row"><div class="stat-row-top"><span>Mana Core</span><span id="profile-mana-value">0</span></div><div class="bar-sm"><div class="bar-sm-fill" id="profile-mana-bar" style="width:0%;background:linear-gradient(90deg,#1a3a8a,#4488ff)"></div></div></div>
+          <div class="stat-row"><div class="stat-row-top"><span>Energy Core</span><span id="profile-energy-value">0</span></div><div class="bar-sm"><div class="bar-sm-fill" id="profile-energy-bar" style="width:0%;background:linear-gradient(90deg,#7a5a00,#ffd700)"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">CORE ATTRIBUTES</div>
+          <div class="attr-row"><div class="attr-name">STRENGTH</div><div class="attr-bar"><div class="attr-fill" id="profile-str-bar" style="width:0%"></div></div><div class="attr-val" id="profile-str-val">0</div></div>
+          <div class="attr-row"><div class="attr-name">INTELLIGENCE</div><div class="attr-bar"><div class="attr-fill" id="profile-int-bar" style="width:0%"></div></div><div class="attr-val" id="profile-int-val">0</div></div>
+          <div class="attr-row"><div class="attr-name">DISCIPLINE</div><div class="attr-bar"><div class="attr-fill" id="profile-dis-bar" style="width:0%"></div></div><div class="attr-val" id="profile-dis-val">0</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -628,4 +785,4 @@ select.inp option { background: #1a0000; }
   </div>
 </div>
 
-<script src="/app.js"></script>`r`n
+<script src="/app.js"></script>

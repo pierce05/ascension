@@ -126,6 +126,22 @@ export const createBaseSystem = (): AscensionSystem => ({
   todayScore: 0,
   todayDone: 0,
   theme: "crimson",
+  profile: {
+    bannerTitle: "Solo Leveling System",
+    username: "shadow.lefnire",
+    quote: "You have to get stronger if you want to survive.",
+    bio: "Builder, grinder, and system-breaker. Turning code, startup work, and discipline into combat power.",
+    guild: "Memora Labs",
+    combatPower: 15670,
+    evolutionStage: "Shadow Monarch Candidate",
+    avatarInitials: "LF",
+    presenceLabel: "Awakened Vessel",
+    badges: [
+      { id: "badge-shadow", label: "Shadow Born", tone: "crimson" },
+      { id: "badge-builder", label: "Builder", tone: "gold" },
+      { id: "badge-memora", label: "Memora Core", tone: "violet" },
+    ],
+  },
   vitals: {
     hp: 1000,
     mp: 1000,

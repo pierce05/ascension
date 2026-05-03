@@ -1,6 +1,18 @@
 import { Router } from "express";
-import { systemRouter } from "./system.routes";
+import { bossesRouter } from "./bosses.routes";
+import { eventsRouter } from "./events.routes";
+import { profileRouter } from "./profile.routes";
+import { questsRouter } from "./quests.routes";
+import { shopRouter } from "./shop.routes";
+import { skillsRouter } from "./skills.routes";
+import { systemsRouter } from "./systems.routes";
 
 export const apiRouter = Router();
 
-apiRouter.use("/systems", systemRouter);
+apiRouter.use("/systems", systemsRouter);
+apiRouter.use("/profile", profileRouter);
+apiRouter.use("/quests", questsRouter);
+apiRouter.use("/bosses", bossesRouter);
+apiRouter.use("/shop", shopRouter);
+apiRouter.use("/skills", skillsRouter);
+apiRouter.use("/events", eventsRouter);
