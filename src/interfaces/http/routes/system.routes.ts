@@ -12,3 +12,9 @@ export const systemRouter = Router();
 
 systemRouter.get("/current", asyncHandler(systemController.getCurrentSystem));
 systemRouter.patch("/theme", asyncHandler(systemController.updateTheme));
+systemRouter.post("/quests", asyncHandler(systemController.createQuest));
+systemRouter.post("/quests/:questId/complete", asyncHandler(systemController.completeQuest));
+systemRouter.post("/bosses", asyncHandler(systemController.createBoss));
+systemRouter.post("/shop/:itemId/purchase", asyncHandler(systemController.purchaseShopItem));
+systemRouter.post("/events/dismiss", asyncHandler(systemController.dismissActiveEvent));
+systemRouter.post("/reset", asyncHandler(systemController.resetSystem));
