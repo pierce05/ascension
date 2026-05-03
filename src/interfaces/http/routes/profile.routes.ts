@@ -5,3 +5,4 @@ import { systemController } from "./shared";
 export const profileRouter = Router();
 
 profileRouter.get("/current", asyncHandler(systemController.getCurrentProfile));
+profileRouter.patch("/current", asyncHandler(systemController.updateProfile));

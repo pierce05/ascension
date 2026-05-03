@@ -7,6 +7,7 @@ import {
   PurchaseShopItemDto,
   UpdateThemeDto,
 } from "../dto/system-actions.dto";
+import { UpdateProfileDto, UpdateProjectDto } from "../dto/profile-project-actions.dto";
 
 const validCategories: QuestCategory[] = ["CP", "DEV", "ML", "HEALTH", "GRIND", "LIFE"];
 
@@ -32,6 +33,16 @@ export class SystemService {
       xp: system.xp,
       xpToNextLevel: system.xpToNextLevel,
     };
+  }
+
+  public async getCurrentProjects() {
+    const system = await this.systemRepository.findCurrent();
+    return system.activeProjects;
+  }
+
+  public async getCurrentInventory() {
+    const system = await this.systemRepository.findCurrent();
+    return system.inventory;
   }
 
   public async getCurrentQuests() {
@@ -64,6 +75,36 @@ export class SystemService {
     }
 
     return this.systemRepository.updateTheme(input.theme);
+  }
+
+  public async updateProfile(input: UpdateProfileDto): Promise<AscensionSystem> {
+    if (!input.profileName.trim()) {
+      throw new AppError("Profile name is required.", 400, "INVALID_PROFILE_NAME");
+    }
+
+    if (!input.username.trim()) {
+      throw new AppError("Username is required.", 400, "INVALID_USERNAME");
+    }
+
+    if (!["ember", "void", "royal"].includes(input.avatarVariant)) {
+      throw new AppError("Avatar variant is invalid.", 400, "INVALID_AVATAR_VARIANT");
+    }
+
+    return this.systemRepository.updateProfile({
+      profileName: input.profileName.trim(),
+      title: input.title.trim() || "The Relentless",
+      className: input.className.trim() || "Shadow Monarch",
+      username: input.username.trim(),
+      quote: input.quote.trim() || "You have to get stronger if you want to survive.",
+      bio: input.bio.trim(),
+      guild: input.guild.trim() || "Memora Labs",
+      bannerTitle: input.bannerTitle.trim() || "Solo Leveling System",
+      evolutionStage: input.evolutionStage.trim() || "Shadow Monarch Candidate",
+      presenceLabel: input.presenceLabel.trim() || "Awakened Vessel",
+      avatarInitials: input.avatarInitials.trim().slice(0, 3).toUpperCase() || "LF",
+      avatarVariant: input.avatarVariant,
+      avatarSigil: input.avatarSigil.trim().slice(0, 12) || "III",
+    });
   }
 
   public async createQuest(input: CreateQuestDto): Promise<AscensionSystem> {
@@ -111,6 +152,29 @@ export class SystemService {
       name: input.name.trim(),
       totalHp: Math.round(input.totalHp),
       reward: input.reward.trim() || "Victory rewards",
+    });
+  }
+
+  public async updateProject(input: UpdateProjectDto): Promise<AscensionSystem> {
+    const system = await this.systemRepository.findCurrent();
+    const project = system.activeProjects.find((entry) => entry.id === input.projectId);
+
+    if (!project) {
+      throw new AppError("Project not found.", 404, "PROJECT_NOT_FOUND");
+    }
+
+    if (Number.isNaN(input.progress) || input.progress < 0 || input.progress > 100) {
+      throw new AppError("Project progress must be between 0 and 100.", 400, "INVALID_PROJECT_PROGRESS");
+    }
+
+    if (!["active", "paused", "completed"].includes(input.status)) {
+      throw new AppError("Project status is invalid.", 400, "INVALID_PROJECT_STATUS");
+    }
+
+    return this.systemRepository.updateProject({
+      projectId: input.projectId,
+      progress: Math.round(input.progress),
+      status: input.status,
     });
   }
 

@@ -2,17 +2,7 @@ const state = {
   system: null,
   selectedSkillCat: "ALL",
   completedVisible: false,
-};
-
-const categoryIcons = {
-  CP: "CP",
-  DEV: "DEV",
-  ML: "ML",
-  HEALTH: "HP",
-  GRIND: "GR",
-  LIFE: "LF",
-  SOCIAL: "SO",
-  CUSTOM: "CU",
+  currentTab: "dashboard",
 };
 
 const skillIcons = {
@@ -20,6 +10,12 @@ const skillIcons = {
   DEV: "DV",
   ML: "ML",
   LIFE: "LF",
+};
+
+const avatarVariantLabels = {
+  ember: "Ember",
+  void: "Void",
+  royal: "Royal",
 };
 
 const formatNumber = (value) => new Intl.NumberFormat("en-US").format(Math.round(value));
@@ -43,10 +39,7 @@ const request = async (url, options = {}) => {
 };
 
 const mapQuestCategory = (category) => {
-  if (category === "SOCIAL" || category === "CUSTOM") {
-    return "LIFE";
-  }
-
+  if (category === "SOCIAL" || category === "CUSTOM") return "LIFE";
   return category;
 };
 
@@ -60,9 +53,7 @@ const getMultiplier = () => {
 const showPopup = (message, color) => {
   const element = document.createElement("div");
   element.className = "xp-popup";
-  if (color) {
-    element.style.background = color;
-  }
+  if (color) element.style.background = color;
   element.textContent = message;
   document.body.appendChild(element);
   setTimeout(() => element.remove(), 2600);
@@ -85,7 +76,9 @@ const updateHeader = () => {
   if (!system) return;
 
   const xpPct = Math.min(100, Math.round((system.xp / system.xpToNextLevel) * 100));
+  document.getElementById("header-avatar").textContent = system.profile.avatar.initials;
   document.getElementById("uname").textContent = system.profileName;
+  document.getElementById("user-rank-line").textContent = `${system.className.toUpperCase()} Â· RANK ${system.rank}`;
   document.getElementById("xp-bar").style.width = `${xpPct}%`;
   document.getElementById("xp-text").textContent = `${formatNumber(system.xp)} / ${formatNumber(system.xpToNextLevel)}`;
   document.getElementById("level-disp").textContent = system.level;
@@ -101,7 +94,6 @@ const renderDashboard = () => {
   document.getElementById("mult-disp").textContent = `x${getMultiplier().toFixed(1)}`;
   document.getElementById("today-score").textContent = `${formatNumber(system.todayScore)} XP`;
   document.getElementById("tasks-done-count").textContent = `${system.todayDone} tasks completed today`;
-
   document.getElementById("str-bar").style.width = `${system.attributes.strength}%`;
   document.getElementById("int-bar").style.width = `${system.attributes.intelligence}%`;
   document.getElementById("dis-bar").style.width = `${system.attributes.discipline}%`;
@@ -134,12 +126,22 @@ const renderDashboard = () => {
   document.getElementById("week-cal").innerHTML = calHTML;
 };
 
+const dailyResetCopy = (system) => {
+  const today = new Date().toISOString().slice(0, 10);
+  if (system.dailyState.lastResetOn === today) {
+    return `Daily reset synced. Streak ${system.streakDays} | Resets ${system.dailyState.resetCount}`;
+  }
+  return `Last reset ${system.dailyState.lastResetOn}`;
+};
+
 const renderProfile = () => {
   const system = state.system;
   if (!system) return;
 
   const xpPct = Math.min(100, Math.round((system.xp / system.xpToNextLevel) * 100));
-  document.getElementById("profile-avatar-initials").textContent = system.profile.avatarInitials;
+  const avatar = document.getElementById("profile-avatar-initials");
+  avatar.textContent = system.profile.avatar.initials;
+  avatar.className = `profile-avatar-lg ${system.profile.avatar.variant}`;
   document.getElementById("profile-display-name").textContent = system.profileName;
   document.getElementById("profile-handle").textContent = system.profile.username;
   document.getElementById("profile-banner-title").textContent = system.profile.bannerTitle;
@@ -169,6 +171,21 @@ const renderProfile = () => {
   document.getElementById("profile-badges").innerHTML = system.profile.badges
     .map((badge) => `<span class="profile-badge ${badge.tone}">${badge.label}</span>`)
     .join("");
+
+  document.getElementById("edit-profile-name").value = system.profileName;
+  document.getElementById("edit-username").value = system.profile.username;
+  document.getElementById("edit-title").value = system.title;
+  document.getElementById("edit-class").value = system.className;
+  document.getElementById("edit-guild").value = system.profile.guild;
+  document.getElementById("edit-presence").value = system.profile.presenceLabel;
+  document.getElementById("edit-banner").value = system.profile.bannerTitle;
+  document.getElementById("edit-stage").value = system.profile.evolutionStage;
+  document.getElementById("edit-avatar-initials").value = system.profile.avatar.initials;
+  document.getElementById("edit-avatar-sigil").value = system.profile.avatar.sigil;
+  document.getElementById("edit-avatar-variant").value = system.profile.avatar.variant;
+  document.getElementById("edit-quote").value = system.profile.quote;
+  document.getElementById("edit-bio").value = system.profile.bio;
+  document.getElementById("daily-reset-note").textContent = `${dailyResetCopy(system)} | Avatar ${avatarVariantLabels[system.profile.avatar.variant]}`;
 };
 
 const questHTML = (quest) => {
@@ -177,7 +194,7 @@ const questHTML = (quest) => {
     <div class="quest-cb ${quest.completed ? "checked" : ""}">${quest.completed ? "OK" : ""}</div>
     <div class="quest-info">
       <div class="quest-name">${quest.title}</div>
-      <div class="quest-cat">${quest.category} · ${quest.difficultyMultiplier}x difficulty</div>
+      <div class="quest-cat">${quest.category} Â· ${quest.difficultyMultiplier}x difficulty</div>
     </div>
     <div class="quest-rewards">
       <span class="xp-tag">+${formatNumber(finalXp)} XP</span>
@@ -189,14 +206,11 @@ const questHTML = (quest) => {
 const renderQuestList = () => {
   const system = state.system;
   if (!system) return;
-
   const active = system.quests.filter((quest) => !quest.completed);
   const done = system.quests.filter((quest) => quest.completed);
-
   document.getElementById("quest-list").innerHTML = active.length
     ? active.map((quest) => questHTML(quest)).join("")
     : '<div style="color:var(--text-dim);font-size:12px;padding:8px">No active quests. Forge some above.</div>';
-
   document.getElementById("completed-list").innerHTML = done.length
     ? done.map((quest) => questHTML(quest)).join("")
     : '<div style="color:var(--text-dim);font-size:12px;padding:8px">None completed yet.</div>';
@@ -205,118 +219,88 @@ const renderQuestList = () => {
 const renderSkills = () => {
   const system = state.system;
   if (!system) return;
-
   const categories = ["ALL", ...new Set(system.skills.map((skill) => skill.category))];
   document.getElementById("skill-cats").innerHTML = categories
-    .map(
-      (category) =>
-        `<button class="btn btn-sm ${state.selectedSkillCat === category ? "" : "btn-gold"}" style="margin:0" onclick="filterSkills('${category}')">${category}</button>`
-    )
+    .map((category) => `<button class="btn btn-sm ${state.selectedSkillCat === category ? "" : "btn-gold"}" style="margin:0" onclick="filterSkills('${category}')">${category}</button>`)
     .join("");
-
-  const filtered = state.selectedSkillCat === "ALL"
-    ? system.skills
-    : system.skills.filter((skill) => skill.category === state.selectedSkillCat);
-
-  document.getElementById("skill-grid").innerHTML = filtered
-    .map((skill) => {
-      const progress = Math.round((skill.level / skill.maxLevel) * 100);
-      return `
-      <div class="skill-node ${skill.unlocked ? "unlocked" : "locked"}">
-        <div class="skill-icon">${skillIcons[skill.category] ?? "--"}</div>
-        <div class="skill-name">${skill.name}</div>
-        <div class="skill-lv">Lv ${skill.level}/${skill.maxLevel}</div>
-        <div class="skill-prog bar-track" style="margin-top:5px"><div class="bar-fill" style="width:${progress}%"></div></div>
-        ${!skill.unlocked ? '<div style="font-size:9px;color:var(--text-dim);margin-top:3px">LOCKED</div>' : ""}
-      </div>`;
-    })
-    .join("");
-
-  document.getElementById("skill-bars").innerHTML = system.skills
-    .filter((skill) => skill.unlocked)
-    .map(
-      (skill) => `
-    <div class="stat-row">
-      <div class="stat-row-top"><span>${skill.name} <span style="color:var(--text-dim);font-size:10px">[${skill.category}]</span></span><span>Lv ${skill.level}</span></div>
-      <div class="bar-sm"><div class="bar-sm-fill" style="width:${Math.round((skill.level / skill.maxLevel) * 100)}%"></div></div>
-    </div>
-  `
-    )
-    .join("");
+  const filtered = state.selectedSkillCat === "ALL" ? system.skills : system.skills.filter((skill) => skill.category === state.selectedSkillCat);
+  document.getElementById("skill-grid").innerHTML = filtered.map((skill) => {
+    const progress = Math.round((skill.level / skill.maxLevel) * 100);
+    return `<div class="skill-node ${skill.unlocked ? "unlocked" : "locked"}">
+      <div class="skill-icon">${skillIcons[skill.category] ?? "--"}</div>
+      <div class="skill-name">${skill.name}</div>
+      <div class="skill-lv">Lv ${skill.level}/${skill.maxLevel}</div>
+      <div class="skill-prog bar-track" style="margin-top:5px"><div class="bar-fill" style="width:${progress}%"></div></div>
+      ${!skill.unlocked ? '<div style="font-size:9px;color:var(--text-dim);margin-top:3px">LOCKED</div>' : ""}
+    </div>`;
+  }).join("");
+  document.getElementById("skill-bars").innerHTML = system.skills.filter((skill) => skill.unlocked).map((skill) => `<div class="stat-row"><div class="stat-row-top"><span>${skill.name} <span style="color:var(--text-dim);font-size:10px">[${skill.category}]</span></span><span>Lv ${skill.level}</span></div><div class="bar-sm"><div class="bar-sm-fill" style="width:${Math.round((skill.level / skill.maxLevel) * 100)}%"></div></div></div>`).join("");
 };
 
 const renderBosses = () => {
   const system = state.system;
   if (!system) return;
-
-  document.getElementById("boss-list").innerHTML =
-    system.bosses
-      .map((boss) => {
-        const pct = Math.round((boss.currentHp / boss.totalHp) * 100);
-        const dead = boss.currentHp === 0;
-        return `<div class="boss-card" style="margin-bottom:10px;${dead ? "opacity:0.5" : ""}">
+  document.getElementById("boss-list").innerHTML = system.bosses.map((boss) => {
+    const pct = Math.round((boss.currentHp / boss.totalHp) * 100);
+    const dead = boss.currentHp === 0;
+    return `<div class="boss-card" style="margin-bottom:10px;${dead ? "opacity:0.5" : ""}">
       <div class="boss-name">${dead ? "DEFEATED " : ""}\"${boss.name}\"</div>
-      <div class="boss-sub">${dead ? "MISSION ACCOMPLISHED" : "ELITE BOSS · ONGOING"}</div>
+      <div class="boss-sub">${dead ? "MISSION ACCOMPLISHED" : "ELITE BOSS Â· ONGOING"}</div>
       <div class="boss-hp-bar"><div class="boss-hp-fill" style="width:${pct}%"></div></div>
-      <div class="boss-stats">
-        <span>HP: ${formatNumber(boss.currentHp)} / ${formatNumber(boss.totalHp)}</span>
-        <span>${pct}% remaining</span>
-        <span style="color:var(--gold)">${boss.reward}</span>
-      </div>
+      <div class="boss-stats"><span>HP: ${formatNumber(boss.currentHp)} / ${formatNumber(boss.totalHp)}</span><span>${pct}% remaining</span><span style="color:var(--gold)">${boss.reward}</span></div>
     </div>`;
-      })
-      .join("") || '<div style="color:var(--text-dim);padding:12px">No bosses summoned yet.</div>';
+  }).join("") || '<div style="color:var(--text-dim);padding:12px">No bosses summoned yet.</div>';
+};
+
+const projectRow = (project) => `<div class="project-item">
+  <div class="project-copy">
+    <div class="project-name">${project.name}</div>
+    <div class="project-summary">${project.summary}</div>
+    <div class="bar-track" style="margin-top:8px"><div class="bar-fill" style="width:${project.progress}%"></div></div>
+  </div>
+  <div class="project-actions">
+    <span class="project-pill">${project.status}</span>
+    <input class="inp" type="number" min="0" max="100" value="${project.progress}" id="project-progress-${project.id}" style="width:78px">
+    <select class="inp" id="project-status-${project.id}" style="width:110px">
+      <option value="active" ${project.status === "active" ? "selected" : ""}>active</option>
+      <option value="paused" ${project.status === "paused" ? "selected" : ""}>paused</option>
+      <option value="completed" ${project.status === "completed" ? "selected" : ""}>completed</option>
+    </select>
+    <button class="btn btn-sm" onclick="saveProject('${project.id}')">SAVE</button>
+  </div>
+</div>`;
+
+const renderProjects = () => {
+  const system = state.system;
+  if (!system) return;
+  const projects = system.activeProjects || [];
+  document.getElementById("projects-list").innerHTML = projects.length
+    ? projects.map(projectRow).join("")
+    : '<div style="color:var(--text-dim);font-size:12px;padding:8px">No projects tracked yet.</div>';
+};
+
+const renderInventoryTab = () => {
+  const system = state.system;
+  if (!system) return;
+  document.getElementById("inventory-tab-list").innerHTML = system.inventory.length
+    ? system.inventory.map((item) => `<div class="inventory-item"><div class="shop-icon">${item.icon}</div><div class="inventory-copy"><div class="inventory-name">${item.name}</div><div class="inventory-meta">${item.description} | ${item.purchasedAt}</div></div></div>`).join("")
+    : '<div style="color:var(--text-dim);font-size:12px;padding:8px">Inventory empty. Buy rewards in the shop to fill this chamber.</div>';
 };
 
 const renderShop = () => {
   const system = state.system;
   if (!system) return;
-
   document.getElementById("shop-coins").textContent = formatNumber(system.coins);
-  document.getElementById("shop-items").innerHTML = system.shopItems
-    .map(
-      (item) => `
-    <div class="shop-item">
-      <div class="shop-icon">${item.icon}</div>
-      <div class="shop-info">
-        <div class="shop-name">${item.name}</div>
-        <div class="shop-desc">${item.description}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-        <div class="shop-price">C ${formatNumber(item.price)}</div>
-        <button class="btn btn-sm btn-gold" onclick="buyItem('${item.id}')" ${system.coins < item.price ? 'disabled style="opacity:0.4"' : ""}>BUY</button>
-      </div>
-    </div>
-  `
-    )
-    .join("");
-
+  document.getElementById("shop-items").innerHTML = system.shopItems.map((item) => `<div class="shop-item"><div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-desc">${item.description}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="shop-price">C ${formatNumber(item.price)}</div><button class="btn btn-sm btn-gold" onclick="buyItem('${item.id}')" ${system.coins < item.price ? 'disabled style="opacity:0.4"' : ""}>BUY</button></div></div>`).join("");
   document.getElementById("inventory-list").innerHTML = system.inventory.length
-    ? system.inventory
-        .map(
-          (item) =>
-            `<div style="display:flex;align-items:center;gap:8px;padding:6px;border:1px solid var(--border);border-radius:3px;margin-bottom:4px;background:var(--bg3)"><span>${item.icon}</span><span style="font-size:12px">${item.name}</span><span style="font-size:10px;color:var(--text-dim);margin-left:auto">${item.purchasedAt}</span></div>`
-        )
-        .join("")
+    ? system.inventory.map((item) => `<div style="display:flex;align-items:center;gap:8px;padding:6px;border:1px solid var(--border);border-radius:3px;margin-bottom:4px;background:var(--bg3)"><span>${item.icon}</span><span style="font-size:12px">${item.name}</span><span style="font-size:10px;color:var(--text-dim);margin-left:auto">${item.purchasedAt}</span></div>`).join("")
     : '<div style="color:var(--text-dim);font-size:12px;padding:8px">Inventory empty. Visit the shop.</div>';
 };
 
 const renderLeaderboard = () => {
   const system = state.system;
   if (!system) return;
-
-  document.getElementById("lb-list").innerHTML = system.leaderboard
-    .map(
-      (player, index) => `
-    <div class="lb-row ${player.isCurrentUser ? "you" : ""}">
-      <div class="lb-rank ${index < 3 ? "top" : ""}">${index + 1}</div>
-      <div class="lb-name">${player.name}</div>
-      <div class="lb-lv">Lv ${player.level}</div>
-      <div class="lb-xp">${formatNumber(player.xp)} XP</div>
-    </div>
-  `
-    )
-    .join("");
+  document.getElementById("lb-list").innerHTML = system.leaderboard.map((player, index) => `<div class="lb-row ${player.isCurrentUser ? "you" : ""}"><div class="lb-rank ${index < 3 ? "top" : ""}">${index + 1}</div><div class="lb-name">${player.name}</div><div class="lb-lv">Lv ${player.level}</div><div class="lb-xp">${formatNumber(player.xp)} XP</div></div>`).join("");
   document.getElementById("total-xp-stat").textContent = formatNumber(system.totalXp);
   document.getElementById("total-quests-stat").textContent = system.questsDone;
 };
@@ -324,21 +308,12 @@ const renderLeaderboard = () => {
 const renderEvent = () => {
   const system = state.system;
   if (!system) return;
-
   const area = document.getElementById("event-area");
   if (!system.activeEvent) {
     area.innerHTML = "";
     return;
   }
-
-  area.innerHTML = `<div class="event-banner">
-    <div class="event-icon">${system.activeEvent.icon}</div>
-    <div>
-      <div class="event-title">${system.activeEvent.title}</div>
-      <div class="event-desc">${system.activeEvent.description}</div>
-    </div>
-    <button class="btn btn-sm" style="margin-left:auto" onclick="dismissEvent()">DISMISS</button>
-  </div>`;
+  area.innerHTML = `<div class="event-banner"><div class="event-icon">${system.activeEvent.icon}</div><div><div class="event-title">${system.activeEvent.title}</div><div class="event-desc">${system.activeEvent.description}</div></div><button class="btn btn-sm" style="margin-left:auto" onclick="dismissEvent()">DISMISS</button></div>`;
 };
 
 const renderAll = () => {
@@ -348,21 +323,22 @@ const renderAll = () => {
   renderQuestList();
   renderSkills();
   renderBosses();
+  renderProjects();
+  renderInventoryTab();
   renderShop();
   renderLeaderboard();
   renderEvent();
 };
 
 const showTab = (id) => {
+  state.currentTab = id;
   document.querySelectorAll(".content").forEach((content) => content.classList.remove("active"));
   document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
   document.getElementById(`tab-${id}`).classList.add("active");
-  document.querySelectorAll(".tab").forEach((tab) => {
-    const label = tab.textContent.toLowerCase();
-    if (label.includes(id.slice(0, 4))) {
-      tab.classList.add("active");
-    }
-  });
+  const activeTab = document.querySelector(`.tab[data-tab="${id}"]`);
+  if (activeTab) {
+    activeTab.classList.add("active");
+  }
 };
 
 const completeQuest = async (id) => {
@@ -381,12 +357,8 @@ const addQuest = async () => {
   const coinReward = Number(document.getElementById("q-coins").value) || 20;
   const category = mapQuestCategory(document.getElementById("q-cat").value);
   const difficultyMultiplier = Number(document.getElementById("q-diff").value) || 1;
-
   try {
-    const system = await request("/api/v1/quests", {
-      method: "POST",
-      body: JSON.stringify({ title, xpReward, coinReward, category, difficultyMultiplier }),
-    });
+    const system = await request("/api/v1/quests", { method: "POST", body: JSON.stringify({ title, xpReward, coinReward, category, difficultyMultiplier }) });
     document.getElementById("q-title").value = "";
     document.getElementById("q-xp").value = "";
     document.getElementById("q-coins").value = "";
@@ -402,18 +374,58 @@ const addBoss = async () => {
   const name = document.getElementById("boss-name").value.trim();
   const totalHp = Number(document.getElementById("boss-hp").value) || 1000;
   const reward = document.getElementById("boss-reward").value.trim();
-
   try {
-    const system = await request("/api/v1/bosses", {
-      method: "POST",
-      body: JSON.stringify({ name, totalHp, reward }),
-    });
+    const system = await request("/api/v1/bosses", { method: "POST", body: JSON.stringify({ name, totalHp, reward }) });
     document.getElementById("boss-name").value = "";
     document.getElementById("boss-hp").value = "";
     document.getElementById("boss-reward").value = "";
     setSystem(system);
     showPopup(`Boss summoned: ${name}`);
     showTab("boss");
+  } catch (error) {
+    showPopup(error.message);
+  }
+};
+
+const saveProfile = async () => {
+  try {
+    const system = await request("/api/v1/profile/current", {
+      method: "PATCH",
+      body: JSON.stringify({
+        profileName: document.getElementById("edit-profile-name").value,
+        username: document.getElementById("edit-username").value,
+        title: document.getElementById("edit-title").value,
+        className: document.getElementById("edit-class").value,
+        guild: document.getElementById("edit-guild").value,
+        presenceLabel: document.getElementById("edit-presence").value,
+        bannerTitle: document.getElementById("edit-banner").value,
+        evolutionStage: document.getElementById("edit-stage").value,
+        avatarInitials: document.getElementById("edit-avatar-initials").value,
+        avatarSigil: document.getElementById("edit-avatar-sigil").value,
+        avatarVariant: document.getElementById("edit-avatar-variant").value,
+        quote: document.getElementById("edit-quote").value,
+        bio: document.getElementById("edit-bio").value,
+      }),
+    });
+    setSystem(system);
+    showPopup("Profile updated.");
+    showTab(state.currentTab);
+  } catch (error) {
+    showPopup(error.message);
+  }
+};
+
+const saveProject = async (projectId) => {
+  try {
+    const system = await request(`/api/v1/projects/${projectId}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        progress: Number(document.getElementById(`project-progress-${projectId}`).value),
+        status: document.getElementById(`project-status-${projectId}`).value,
+      }),
+    });
+    setSystem(system);
+    showPopup("Project updated.");
   } catch (error) {
     showPopup(error.message);
   }
@@ -453,6 +465,8 @@ window.showTab = showTab;
 window.completeQuest = completeQuest;
 window.addQuest = addQuest;
 window.addBoss = addBoss;
+window.saveProfile = saveProfile;
+window.saveProject = saveProject;
 window.buyItem = buyItem;
 window.filterSkills = filterSkills;
 window.toggleCompleted = toggleCompleted;

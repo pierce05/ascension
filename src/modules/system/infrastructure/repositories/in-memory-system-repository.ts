@@ -7,11 +7,15 @@ import {
   CreateBossInput,
   CreateQuestInput,
   SystemRepository,
+  UpdateProfileInput,
+  UpdateProjectInput,
 } from "../../domain/repositories/system-repository";
 import {
+  applyDailyReset,
   applyQuestCompletion,
   getDifficultyTier,
   rollEvent,
+  updateProjectProgress,
 } from "../../domain/services/progression";
 import {
   createBaseSystem,
@@ -30,17 +34,44 @@ export class InMemorySystemRepository implements SystemRepository {
 
   public async findCurrent(): Promise<AscensionSystem> {
     await this.ensureLoaded();
+    this.applyDailyState();
     return this.getSnapshot();
   }
 
   public async updateTheme(theme: ThemeOption): Promise<AscensionSystem> {
     await this.ensureLoaded();
+    this.applyDailyState();
     this.state.theme = theme;
+    return this.commit();
+  }
+
+  public async updateProfile(input: UpdateProfileInput): Promise<AscensionSystem> {
+    await this.ensureLoaded();
+    this.applyDailyState();
+    this.state.profileName = input.profileName;
+    this.state.title = input.title;
+    this.state.className = input.className;
+    this.state.profile = {
+      ...this.state.profile,
+      bannerTitle: input.bannerTitle,
+      username: input.username,
+      quote: input.quote,
+      bio: input.bio,
+      guild: input.guild,
+      evolutionStage: input.evolutionStage,
+      presenceLabel: input.presenceLabel,
+      avatar: {
+        initials: input.avatarInitials,
+        variant: input.avatarVariant,
+        sigil: input.avatarSigil,
+      },
+    };
     return this.commit();
   }
 
   public async createQuest(input: CreateQuestInput): Promise<AscensionSystem> {
     await this.ensureLoaded();
+    this.applyDailyState();
     this.state.quests.unshift({
       id: createId("quest"),
       title: input.title,
@@ -57,6 +88,7 @@ export class InMemorySystemRepository implements SystemRepository {
 
   public async completeQuest(questId: string): Promise<AscensionSystem> {
     await this.ensureLoaded();
+    this.applyDailyState();
     const quest = this.state.quests.find((item) => item.id === questId);
 
     if (!quest || quest.completed) {
@@ -71,6 +103,7 @@ export class InMemorySystemRepository implements SystemRepository {
 
   public async createBoss(input: CreateBossInput): Promise<AscensionSystem> {
     await this.ensureLoaded();
+    this.applyDailyState();
     this.state.bosses.push({
       id: createId("boss"),
       name: input.name,
@@ -82,8 +115,21 @@ export class InMemorySystemRepository implements SystemRepository {
     return this.commit();
   }
 
+  public async updateProject(input: UpdateProjectInput): Promise<AscensionSystem> {
+    await this.ensureLoaded();
+    this.applyDailyState();
+    this.state.activeProjects = updateProjectProgress(
+      this.state.activeProjects,
+      input.projectId,
+      input.progress,
+      input.status
+    );
+    return this.commit();
+  }
+
   public async purchaseShopItem(itemId: string): Promise<AscensionSystem> {
     await this.ensureLoaded();
+    this.applyDailyState();
     const item = this.state.shopItems.find((entry) => entry.id === itemId);
 
     if (!item) {
@@ -104,12 +150,14 @@ export class InMemorySystemRepository implements SystemRepository {
 
   public async dismissActiveEvent(): Promise<AscensionSystem> {
     await this.ensureLoaded();
+    this.applyDailyState();
     this.state.activeEvent = null;
     return this.commit();
   }
 
   public async findQuestById(questId: string): Promise<Quest | null> {
     await this.ensureLoaded();
+    this.applyDailyState();
     return structuredClone(this.state.quests.find((quest) => quest.id === questId) ?? null);
   }
 
@@ -153,6 +201,10 @@ export class InMemorySystemRepository implements SystemRepository {
     this.hasLoaded = true;
   }
 
+  private applyDailyState(): void {
+    applyDailyReset(this.state);
+  }
+
   private hydrateState(value: unknown): AscensionSystem {
     const snapshot = createBaseSystem();
 
@@ -163,6 +215,18 @@ export class InMemorySystemRepository implements SystemRepository {
     return {
       ...snapshot,
       ...(value as Partial<AscensionSystem>),
+      profile: {
+        ...snapshot.profile,
+        ...((value as Partial<AscensionSystem>).profile ?? {}),
+        avatar: {
+          ...snapshot.profile.avatar,
+          ...(((value as Partial<AscensionSystem>).profile?.avatar) ?? {}),
+        },
+      },
+      dailyState: {
+        ...snapshot.dailyState,
+        ...((value as Partial<AscensionSystem>).dailyState ?? {}),
+      },
       vitals: {
         ...snapshot.vitals,
         ...((value as Partial<AscensionSystem>).vitals ?? {}),
@@ -180,6 +244,9 @@ export class InMemorySystemRepository implements SystemRepository {
       bosses: Array.isArray((value as Partial<AscensionSystem>).bosses)
         ? ((value as Partial<AscensionSystem>).bosses as AscensionSystem["bosses"])
         : snapshot.bosses,
+      activeProjects: Array.isArray((value as Partial<AscensionSystem>).activeProjects)
+        ? ((value as Partial<AscensionSystem>).activeProjects as AscensionSystem["activeProjects"])
+        : snapshot.activeProjects,
       shopItems: Array.isArray((value as Partial<AscensionSystem>).shopItems)
         ? ((value as Partial<AscensionSystem>).shopItems as AscensionSystem["shopItems"])
         : snapshot.shopItems,

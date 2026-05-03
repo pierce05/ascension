@@ -1,4 +1,5 @@
 import {
+  ActiveProject,
   AscensionSystem,
   DifficultyTier,
   EventState,
@@ -119,6 +120,7 @@ export const applyQuestCompletion = (
   applyLevelUps(state);
   damageBosses(state, gainedXp * 2);
   upgradeSkillFromCategory(state, quest.category);
+  state.dailyState.lastActiveOn = todayStamp();
 
   return { gainedXp, gainedCoins };
 };
@@ -134,3 +136,47 @@ export const rollEvent = (
   const index = Math.floor(Math.random() * eventCatalog.length);
   state.activeEvent = eventCatalog[index];
 };
+
+export const todayStamp = (): string => new Date().toISOString().slice(0, 10);
+
+const daysBetween = (from: string, to: string): number => {
+  const fromDate = new Date(`${from}T00:00:00Z`);
+  const toDate = new Date(`${to}T00:00:00Z`);
+  return Math.floor((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24));
+};
+
+export const applyDailyReset = (state: AscensionSystem): void => {
+  const today = todayStamp();
+  const daysSinceReset = daysBetween(state.dailyState.lastResetOn, today);
+
+  if (daysSinceReset <= 0) {
+    return;
+  }
+
+  const daysSinceActive = daysBetween(state.dailyState.lastActiveOn, today);
+
+  state.todayScore = 0;
+  state.todayDone = 0;
+  state.activeEvent = null;
+  state.quests = state.quests.map((quest) => ({ ...quest, completed: false }));
+  state.dailyState.lastResetOn = today;
+  state.dailyState.resetCount += 1;
+
+  if (daysSinceActive > 1) {
+    state.streakDays = 0;
+    state.coins = Math.max(0, state.coins - 40);
+    state.attributes.discipline = Math.max(10, state.attributes.discipline - 3);
+  }
+};
+
+export const updateProjectProgress = (
+  projects: ActiveProject[],
+  projectId: string,
+  progress: number,
+  status: ActiveProject["status"]
+): ActiveProject[] =>
+  projects.map((project) =>
+    project.id === projectId
+      ? { ...project, progress: Math.max(0, Math.min(100, progress)), status }
+      : project
+  );

@@ -77,6 +77,14 @@ export type ProfileBadge = {
   tone: "crimson" | "gold" | "violet";
 };
 
+export type AvatarVariant = "ember" | "void" | "royal";
+
+export type AvatarProfile = {
+  initials: string;
+  variant: AvatarVariant;
+  sigil: string;
+};
+
 export type PlayerProfile = {
   bannerTitle: string;
   username: string;
@@ -85,10 +93,27 @@ export type PlayerProfile = {
   guild: string;
   combatPower: number;
   evolutionStage: string;
-  avatarInitials: string;
   presenceLabel: string;
+  avatar: AvatarProfile;
   badges: ProfileBadge[];
- };
+};
+
+export type ProjectStatus = "active" | "paused" | "completed";
+
+export type ActiveProject = {
+  id: string;
+  name: string;
+  summary: string;
+  progress: number;
+  status: ProjectStatus;
+  category: "startup" | "learning" | "career" | "personal";
+};
+
+export type DailyState = {
+  lastActiveOn: string;
+  lastResetOn: string;
+  resetCount: number;
+};
 
 export type AscensionSystem = {
   id: string;
@@ -108,11 +133,13 @@ export type AscensionSystem = {
   todayDone: number;
   theme: ThemeOption;
   profile: PlayerProfile;
+  dailyState: DailyState;
   vitals: Vitals;
   attributes: Attributes;
   quests: Quest[];
   skills: Skill[];
   bosses: Boss[];
+  activeProjects: ActiveProject[];
   shopItems: ShopItem[];
   inventory: InventoryItem[];
   leaderboard: LeaderboardEntry[];

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { env } from "../../../../config/env";
-import { AscensionSystem, Boss, EventState, Quest, Skill } from "../../domain/entities/system";
+import { ActiveProject, AscensionSystem, Boss, EventState, Quest, Skill } from "../../domain/entities/system";
 import { xpNeededForLevel } from "../../domain/services/progression";
 
 export const defaultStateFilePath =
@@ -109,6 +109,35 @@ const baseBosses: Boss[] = [
   },
 ];
 
+const baseProjects: ActiveProject[] = [
+  {
+    id: "project-memora",
+    name: "Memora App",
+    summary: "Retention loop, core UX, and onboarding flow.",
+    progress: 78,
+    status: "active",
+    category: "startup",
+  },
+  {
+    id: "project-rag",
+    name: "ML RAG System",
+    summary: "Retriever tuning, eval set quality, and answer grounding.",
+    progress: 52,
+    status: "active",
+    category: "learning",
+  },
+  {
+    id: "project-portfolio",
+    name: "Portfolio Website",
+    summary: "Polish pass, recruiter copy, and case study cleanup.",
+    progress: 90,
+    status: "active",
+    category: "career",
+  },
+];
+
+const todayStamp = () => new Date().toISOString().slice(0, 10);
+
 export const createBaseSystem = (): AscensionSystem => ({
   id: "main-system",
   profileName: "LEFNIRE",
@@ -134,13 +163,22 @@ export const createBaseSystem = (): AscensionSystem => ({
     guild: "Memora Labs",
     combatPower: 15670,
     evolutionStage: "Shadow Monarch Candidate",
-    avatarInitials: "LF",
     presenceLabel: "Awakened Vessel",
+    avatar: {
+      initials: "LF",
+      variant: "ember",
+      sigil: "III",
+    },
     badges: [
       { id: "badge-shadow", label: "Shadow Born", tone: "crimson" },
       { id: "badge-builder", label: "Builder", tone: "gold" },
       { id: "badge-memora", label: "Memora Core", tone: "violet" },
     ],
+  },
+  dailyState: {
+    lastActiveOn: todayStamp(),
+    lastResetOn: todayStamp(),
+    resetCount: 0,
   },
   vitals: {
     hp: 1000,
@@ -155,6 +193,7 @@ export const createBaseSystem = (): AscensionSystem => ({
   quests: baseQuests,
   skills: baseSkills,
   bosses: baseBosses,
+  activeProjects: baseProjects,
   shopItems: [
     { id: "shop-1", name: "XP Booster", description: "+50% XP for 1 day", price: 200, icon: "⚡", type: "booster" },
     { id: "shop-2", name: "Focus Potion", description: "+2 hrs Deep Work energy", price: 150, icon: "🧪", type: "booster" },

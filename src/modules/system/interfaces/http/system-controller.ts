@@ -22,6 +22,25 @@ export class SystemController {
     response.status(200).json({ data: profile });
   };
 
+  public updateProfile = async (request: Request, response: Response): Promise<void> => {
+    const system = await this.systemService.updateProfile({
+      profileName: request.body.profileName,
+      title: request.body.title,
+      className: request.body.className,
+      username: request.body.username,
+      quote: request.body.quote,
+      bio: request.body.bio,
+      guild: request.body.guild,
+      bannerTitle: request.body.bannerTitle,
+      evolutionStage: request.body.evolutionStage,
+      presenceLabel: request.body.presenceLabel,
+      avatarInitials: request.body.avatarInitials,
+      avatarVariant: request.body.avatarVariant,
+      avatarSigil: request.body.avatarSigil,
+    });
+    response.status(200).json({ data: system });
+  };
+
   public getCurrentQuests = async (_request: Request, response: Response): Promise<void> => {
     const quests = await this.systemService.getCurrentQuests();
     response.status(200).json({ data: quests });
@@ -40,6 +59,25 @@ export class SystemController {
   public getCurrentSkills = async (_request: Request, response: Response): Promise<void> => {
     const skills = await this.systemService.getCurrentSkills();
     response.status(200).json({ data: skills });
+  };
+
+  public getCurrentProjects = async (_request: Request, response: Response): Promise<void> => {
+    const projects = await this.systemService.getCurrentProjects();
+    response.status(200).json({ data: projects });
+  };
+
+  public updateProject = async (request: Request, response: Response): Promise<void> => {
+    const system = await this.systemService.updateProject({
+      projectId: this.getSingleParam(request.params.projectId),
+      progress: Number(request.body.progress),
+      status: request.body.status,
+    });
+    response.status(200).json({ data: system });
+  };
+
+  public getCurrentInventory = async (_request: Request, response: Response): Promise<void> => {
+    const inventory = await this.systemService.getCurrentInventory();
+    response.status(200).json({ data: inventory });
   };
 
   public updateTheme = async (request: Request, response: Response): Promise<void> => {
